@@ -1,6 +1,6 @@
 # Mode "priceRangeMode: linear"
 
-Lorsque le paramètre `priceRangeMode` est défini sur `"linear"` dans le fichier de configuration `src/configs/optionsModifiers.ts`, le système de calcul peut entrer dans 2 logiques de calcul en fonction du paramètre `boostMode` :
+Lorsque le paramètre `priceRangeMode` est défini sur `"linear"` dans le fichier de configuration `src/configs/optionsModifiers.ts`, le système de calcul peut entrer dans 2 logiques de calcul en fonction du paramètre `boostMode`  :
 
 - `boostMode: centered` : le boost est calculé en fonction du centrage de la plage par rapport au prix actuel
 - `boostMode: proximity` : le boost est calculé en fonction de la position relative du prix actuel par rapport aux différentes tranches de liquidités dans la plage
