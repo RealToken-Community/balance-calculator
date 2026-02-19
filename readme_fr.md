@@ -91,34 +91,16 @@ Modifier la copie du fichier `.env.example` en `.env` à la racine du projet ave
    - Copiez la clé dans votre .env :
      `THEGRAPH_API_KEY=votre_clé_api`
 
-2. **Etherscan API Key**
+2. **Clé API Etherscan (API V2 – une seule clé pour toutes les chaînes)**
 
-   - Visitez [Etherscan](https://etherscan.io/apis)
-   - Créez un compte ou connectez-vous
-   - Allez dans API Keys > Add
-   - Créez une nouvelle clé API
+   - Nous utilisons l’[API Etherscan V2](https://docs.etherscan.io/v2-migration) ; la V1 est dépréciée.
+   - Visitez le [tableau de bord API Etherscan](https://etherscan.io/apidashboard)
+   - Créez un compte ou connectez-vous, puis créez une nouvelle clé API
+   - Cette clé unique est utilisée pour Ethereum, Gnosis, Polygon, etc. (chainid est géré automatiquement)
    - Copiez la clé dans votre .env :
      `API_KEY_ETHERSCAN=votre_clé_etherscan`
 
-3. **Gnosisscan API Key**
-
-   - Visitez [Gnosisscan](https://gnosisscan.io/)
-   - Créez un compte ou connectez-vous
-   - Allez dans API Keys > Add
-   - Créez une nouvelle clé API
-   - Copiez la clé dans votre .env :
-     `API_KEY_GNOSISSCAN=votre_clé_gnosisscan`
-
-4. **Polygonscan API Key**
-
-   - Visitez [Polygonscan](https://polygonscan.com/apis)
-   - Créez un compte ou connectez-vous
-   - Allez dans API Keys > Add
-   - Créez une nouvelle clé API
-   - Copiez la clé dans votre .env :
-     `API_KEY_POLYGONSCAN=votre_clé_polygonscan`
-
-5. **Moralis API Key**
+3. **Clé API Moralis**
 
    - Visitez [Moralis](https://developer.moralis.com/)
    - Créez un compte ou connectez-vous
@@ -127,13 +109,13 @@ Modifier la copie du fichier `.env.example` en `.env` à la racine du projet ave
    - Copiez la clé dans votre .env :
      `API_KEY_MORALIS=votre_clé_moralis`
 
-6. **Endpoints supplémentaires (Optionnel)**
+4. **Endpoints supplémentaires (Optionnel)**
    Permet d'utiliser un endpoint Graphql personnalisé qui fourni le bon format de données
 
    - Ajoutez vos endpoints supplémentaires sous forme de tableau JSON :
      `ENDPOINT_EXTRA=["https://endpoint1.com","https://endpoint2.com"]`
 
-7. **URLs de développement The Graph (Optionnel)**
+5. **URLs de développement The Graph (Optionnel)**
    Si vous développez avec des endpoints The Graph personnalisés :
    ```
    THE_GRAPH_DEV_URL_REG_GNOSIS="votre_url"
@@ -145,9 +127,8 @@ Modifier la copie du fichier `.env.example` en `.env` à la racine du projet ave
 Votre fichier .env final devrait ressembler à ceci :
 
 ```
-API_KEY_GNOSISSCAN="votre_clé_gnosisscan"
+# API Etherscan V2 – une clé pour toutes les chaînes (Ethereum, Gnosis, Polygon)
 API_KEY_ETHERSCAN="votre_clé_etherscan"
-API_KEY_POLYGONSCAN="votre_clé_polygonscan"
 
 API_KEY_MORALIS="votre_clé_moralis"
 

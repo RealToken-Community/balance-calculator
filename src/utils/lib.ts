@@ -12,6 +12,7 @@ import {
   Network,
   blockStartREG,
   etherscanApiUrls,
+  etherscanChainIds,
   moralisApiUrls,
 } from "../configs/constantes.js";
 import { i18n } from "../i18n/index.js";
@@ -109,19 +110,20 @@ export async function getBlockNumber(timestamp: number | undefined, network: Net
     throw new Error(i18n.t("utils.lib.errorApiUrlNotFound", { network }));
   }
 
-  const apiKey =
-    network === NETWORK.ETHEREUM
-      ? process.env[keyFactory("API_KEY_", "etherscan", "upper")]
-      : process.env[keyFactory("API_KEY_", network, "upper", "SCAN")];
+  // Etherscan API V2: a single key is used for all chains (chainid specified in the parameters)
+  const apiKey = process.env[keyFactory("API_KEY_", "etherscan", "upper")];
 
   if (!apiKey || !apiKey.length) {
     throw new Error(i18n.t("common.errors.errorApiKeyNotFound", { network, apiKey }));
   }
 
+  const chainid = etherscanChainIds[network];
+
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       const response = await axios.get(apiUrl, {
         params: {
+          chainid,
           module: "block",
           action: "getblocknobytime",
           timestamp: timestamp,
