@@ -87,34 +87,16 @@ Modify the copy of the `.env.example` file to `.env` at the root of the project 
    - Copy the key into your .env:
      `THEGRAPH_API_KEY=your_api_key`
 
-2. **Etherscan API Key**
+2. **Etherscan API Key (API V2 – one key for all chains)**
 
-   - Visit [Etherscan](https://etherscan.io/apis)
-   - Create an account or log in
-   - Go to API Keys > Add
-   - Create a new API key
+   - We use [Etherscan API V2](https://docs.etherscan.io/v2-migration); V1 is deprecated.
+   - Visit [Etherscan API dashboard](https://etherscan.io/apidashboard)
+   - Create an account or log in, then create a new API key
+   - This single key is used for Ethereum, Gnosis, Polygon, etc. (chainid is set automatically)
    - Copy the key into your .env:
      `API_KEY_ETHERSCAN=your_etherscan_key`
 
-3. **Gnosisscan API Key**
-
-   - Visit [Gnosisscan](https://gnosisscan.io/)
-   - Create an account or log in
-   - Go to API Keys > Add
-   - Create a new API key
-   - Copy the key into your .env:
-     `API_KEY_GNOSISSCAN=your_gnosisscan_key`
-
-4. **Polygonscan API Key**
-
-   - Visit [Polygonscan](https://polygonscan.com/apis)
-   - Create an account or log in
-   - Go to API Keys > Add
-   - Create a new API key
-   - Copy the key into your .env:
-     `API_KEY_POLYGONSCAN=your_polygonscan_key`
-
-5. **Moralis API Key**
+3. **Moralis API Key**
 
    - Visit [Moralis](https://developer.moralis.com/)
    - Create an account or log in
@@ -123,12 +105,12 @@ Modify the copy of the `.env.example` file to `.env` at the root of the project 
    - Copy the key into your .env:
      `API_KEY_MORALIS=your_moralis_key`
 
-6. **Additional Endpoints (Optional)**
+4. **Additional Endpoints (Optional)**
 
    - Add your additional endpoints as a JSON array:
      `ENDPOINT_EXTRA=["https://endpoint1.com","https://endpoint2.com"]`
 
-7. **The Graph Development URLs (Optional)**
+5. **The Graph Development URLs (Optional)**
    If you are developing with custom The Graph endpoints:
    ```
    THE_GRAPH_DEV_URL_REG_GNOSIS="your_url"
@@ -140,9 +122,8 @@ Modify the copy of the `.env.example` file to `.env` at the root of the project 
 Your final .env file should look like this:
 
 ```
-API_KEY_GNOSISSCAN="your_gnosisscan_key"
+# Etherscan API V2 – one key for all chains (Ethereum, Gnosis, Polygon)
 API_KEY_ETHERSCAN="your_etherscan_key"
-API_KEY_POLYGONSCAN="your_polygonscan_key"
 
 THEGRAPH_API_KEY="your_thegraph_key"
 
