@@ -21,10 +21,25 @@ export type RetourREG = {
         [key in DEX]?: Array<{
           tokenBalance: string;
           tokenSymbol: string;
+          tokenDecimals: number;
+          tokenPosition?: number;
           tokenAddress: string;
           poolAddress: string;
           equivalentREG: string;
           positionId?: number;
+          isActive?: boolean;
+          tickLower?: number;
+          tickUpper?: number;
+          currentTick?: number;
+          currentPrice?: string;
+          minPrice?: number;
+          maxPrice?: number;
+          liquidityAmount?: string;
+          votingPower?: string;
+          scaleFactor?: number;
+          token0Decimals?: number;
+          token1Decimals?: number;
+          feeTier?: number;
         }>;
       };
     };

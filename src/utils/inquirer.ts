@@ -136,7 +136,7 @@ export async function askChoiseListe(message: string, list: { value: string[]; n
   const answers: string = await select({
     message: message,
     choices: list.value.map((str, i) => ({ name: list.name[i], value: str })),
-    pageSize: 5,
+    pageSize: 20, // old:5, but for interface, we need to see a maximum of options
     loop: true,
   });
 

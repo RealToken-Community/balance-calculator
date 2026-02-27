@@ -35,6 +35,7 @@ import {
   askUseconfirm,
 } from "../utils/inquirer.js";
 import { readContentFromFile } from "../utils/lib.js";
+import { transformAllV2PoolsToV3 } from "../utils/v3RangeHelper.js";
 
 const __dirname = new URL(".", import.meta.url).pathname;
 
@@ -207,12 +208,12 @@ async function setupDateRange(allBalancesWallets: Array<RetourREG>, pathFile: st
   // Configure les options de temps
   const optionTime = skipAskNewDate
     ? {
-        skipAsk: skipAskNewDate,
-        startDate: parsed.params.dateStart,
-        endDate: parsed.params.dateEnd,
-        snapshotTime: parsed.params.snapshotTime,
-        currantTimestemp: parsed.params.currantTimestemp,
-      }
+      skipAsk: skipAskNewDate,
+      startDate: parsed.params.dateStart,
+      endDate: parsed.params.dateEnd,
+      snapshotTime: parsed.params.snapshotTime,
+      currantTimestemp: parsed.params.currantTimestemp,
+    }
     : {};
 
   // Retourne la plage de dates configurée
@@ -525,6 +526,21 @@ async function processDexBalances(
       for (const position of pool.liquidityPositions) {
         const holderAddress = position.user.id;
 
+        // Prépare les données V3 si c'est un DEX V3
+        let v3Data = undefined;
+        if (dexType === "v3" && position.positionId !== undefined) {
+          v3Data = {
+            isActive: position.isActive,
+            tickLower: position.tickLower,
+            tickUpper: position.tickUpper,
+            currentTick: position.currentTick,
+            currentPrice: position.currentPrice,
+            minPrice: position.minPrice,
+            maxPrice: position.maxPrice,
+            liquidityAmount: position.liquidityAmount,
+          };
+        }
+
         // Met à jour le solde DEX pour chaque liquidité
         for (const liquidity of position.liquidity) {
           updateDexBalance(
@@ -535,7 +551,8 @@ async function processDexBalances(
             liquidity,
             allBalancesWallets,
             dexType,
-            position.positionId
+            position.positionId,
+            v3Data
           );
         }
       }
@@ -553,6 +570,7 @@ async function processDexBalances(
  * @param allBalancesWallets - Tableau des soldes
  * @param dexType - Type de DEX (v2 ou v3)
  * @param positionId - ID de la position (pour les DEX V3)
+ * @param v3Data - Données supplémentaires pour les positions V3
  */
 function updateDexBalance(
   network: Network,
@@ -562,7 +580,21 @@ function updateDexBalance(
   liquidity: TokenInfo,
   allBalancesWallets: Array<RetourREG>,
   dexType: "v2" | "v3" = "v2", // Par défaut, on considère que c'est un DEX V2
-  positionId?: number
+  positionId?: number,
+  v3Data?: {
+    isActive?: boolean;
+    tickLower?: number;
+    tickUpper?: number;
+    currentTick?: number;
+    currentPrice?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    liquidityAmount?: string;
+    scaleFactor?: number; // Facteur d'échelle pour la conversion tick/prix //TODO: a vérifier si nous en avons besoin
+    token0Decimals?: number; // Décimales du premier token (généralement REG)
+    token1Decimals?: number; // Décimales du deuxième token (généralement USDC)
+    feeTier?: number; // Niveau de frais (0.05%, 0.3%, 1%, etc.)
+  }
 ) {
   const walletIndex = allBalancesWallets.findIndex((wallet) => wallet.walletAddress === holderAddress);
 
@@ -650,10 +682,13 @@ function updateDexBalance(
     wallet.sourceBalance[network].dexs![dex].push({
       tokenBalance: liquidity.tokenBalance ?? "0",
       tokenSymbol: liquidity.tokenSymbol ?? "undefined",
+      tokenDecimals: liquidity.tokenDecimals ?? 18,
       tokenAddress: liquidity.tokenId ?? "0x0",
       poolAddress: poolAddress,
       equivalentREG: liquidity.equivalentREG ?? "0",
       positionId: isV3 ? positionId : undefined, // Ajouter l'ID de position uniquement pour les DEX V3
+      tokenPosition: liquidity.tokenPosition,
+      ...(isV3 && v3Data ? v3Data : {}),
     });
   }
 
@@ -695,11 +730,14 @@ function writeTempFile(
   pathFile: string,
   typeSumm: "sum" | "average" | "onDay"
 ) {
+  // Transformer toutes les pools V2 en format V3 avant de sauvegarder
+  const transformedBalances = transformAllV2PoolsToV3(balances);
+  
   fs.writeFileSync(
     pathFile,
     JSON.stringify(
       {
-        result: { balances },
+        result: { balances: transformedBalances },
         params: {
           currantTimestemp: timestamp,
           dateCurrant: currentDate,

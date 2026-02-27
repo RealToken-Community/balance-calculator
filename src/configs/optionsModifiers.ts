@@ -1,5 +1,5 @@
 import { NormalizeOptions } from "../types/inputModles.types.js";
-import dexConfig from "./dex.json" assert { type: "json" };
+import dexConfig from "./dex.json" with { type: "json" };
 
 /**
  * Fonction pour extraire toutes les adresses de pool du fichier de configuration dex.json
@@ -33,6 +33,7 @@ const excludeAddressREG = [
   "0x9a760aa1fe631fd9ac0aee0965736121c7c132cc", // mtp onoff ramp
   "0xb65a382e536cf80a792e10b1ff24f3c04845d4a3", // realt gestion budget mtp
   "0x555eb55cbc477aebbe5652d25d0fea04052d3971", // Budget Team RealT sur sablier
+  "0xce88686553686da562ce7cea497ce749da109f9f", // Balancer fee collector (pools multi-tokens)
   ...getDexPoolAddresses(),
 ];
 
@@ -42,23 +43,64 @@ const excludeAddressREG = [
  */
 export const optionsModifiers: NormalizeOptions = {
   excludeAddresses: excludeAddressREG,
-  boosBalancesDexs: {
-    sushiswap: [
-      ["REG", "*"],
-      [4, 2],
-    ],
-    balancer: [
-      ["REG", "*"],
-      [4, 2],
-    ],
-    honeyswap: [
-      ["REG", "*"],
-      [4, 2],
-    ],
-    swaprhq: [
-      ["REG", "*"],
-      [4, 2],
-    ],
+  boostBalancesDexs: {
+    // Multiplicateurs de base globaux (utilisés pour le calcul du boost final)
+    default: {
+      REG: 4, // Multiplicateur de base pour REG
+      "*": 2, // Multiplicateur de base pour tous les autres tokens
+    },
+    // Configuration V3 globale (utilisée par défaut pour tous les DEX)
+    defaultV3: {
+      sourceValue: "tick", // priceDecimals ou tick
+      priceRangeMode: "linear", // linear ou step
+      boostMode: "proximity",
+      // steps: [
+      //   [0.2, 5], // De 0 à 2 tranches (20% de decaySlices) → boost de 5
+      //   [0.5, 3], // De 3 à 5 tranches (30% de decaySlices) → boost de 3
+      //   [0.7, 2], // De 6 à 7 tranches (70% de decaySlices) → boost de 2
+      //   [1.0, 1], // De 8 à 10 tranches (100% de decaySlices) → boost de 1
+      // ],
+      maxBoost: 5,
+      minBoost: 1,
+      // inactiveBoost: 1, // Boost appliqué aux pools V3 "out of range"
+      sliceWidth: 1000, // 0.1 ou 0.05 en priceDecimals, 1000 en tick
+      decaySlicesDown: 10,
+      decaySlicesUp: 10,
+      outOfRangeEnabled: true, // Activer le calcul de boost pour les positions hors plage (avec décroissance basée sur la proximité)
+    },
+    // Spécificités par DEX (override seulement si nécessaire)
+    sushiswap: {
+      default: {
+        REG: 4,
+        "*": 2,
+      },
+      // Hérite de defaultV3, peut override certains paramètres si besoin
+    },
+    balancer: {
+      default: {
+        REG: 4,
+        "*": 2,
+      },
+      // Hérite de defaultV3
+    },
+    honeyswap: {
+      default: {
+        REG: 4,
+        "*": 2,
+      },
+      // Hérite de defaultV3
+    },
+    swaprhq: {
+      default: {
+        REG: 4,
+        "*": 2,
+      },
+      // Spécificité: utilise ticks et pas de calcul de concentration
+      v3: {
+        sourceValue: "tick",
+        priceRangeMode: "none",
+      },
+    },
   },
   boostBalancesIncentivesVault: 1, // 2 vault locked, 1 vault unlocked
   boostBalancesWallet: 1,

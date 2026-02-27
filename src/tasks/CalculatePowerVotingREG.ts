@@ -66,15 +66,14 @@ export async function taskCalculatePowerVotingREG(): Promise<string> {
 
   const jsonFilesPowerVotingREG = await getJsonFiles(dirPath, "powerVotingREG");
 
-  if (jsonFilesPowerVotingREG.length === 0) {
-    console.error(i18n.t("tasks.calculatePowerVoting.noJsonFiles"));
-    return "";
-  }
+  let previousDataPowerVotingJsonFileName = "none";
 
-  const previousDataPowerVotingJsonFileName = await askChoiseListe(
-    i18n.t("tasks.calculatePowerVoting.askPreviousDataPowerVotingJsonFile"),
-    { value: [...jsonFilesPowerVotingREG, "none"], name: [...jsonFilesPowerVotingREG, "None"] }
-  );
+  if (jsonFilesPowerVotingREG.length > 0) {
+    previousDataPowerVotingJsonFileName = await askChoiseListe(
+      i18n.t("tasks.calculatePowerVoting.askPreviousDataPowerVotingJsonFile"),
+      { value: [...jsonFilesPowerVotingREG, "none"], name: [...jsonFilesPowerVotingREG, "None"] }
+    );
+  }
 
   let previousDataPowerVotingJsonData: {
     tx_datas: Array<Array<Array<string>>>;

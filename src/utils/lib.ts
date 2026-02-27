@@ -6,11 +6,13 @@ import Moralis from "moralis";
 import path from "path";
 import util from "util";
 import {
+  MODE_DEBUG,
   NETWORK,
   NETWORK_ID,
   Network,
   blockStartREG,
   etherscanApiUrls,
+  etherscanChainIds,
   moralisApiUrls,
 } from "../configs/constantes.js";
 import { i18n } from "../i18n/index.js";
@@ -108,19 +110,20 @@ export async function getBlockNumber(timestamp: number | undefined, network: Net
     throw new Error(i18n.t("utils.lib.errorApiUrlNotFound", { network }));
   }
 
-  const apiKey =
-    network === NETWORK.ETHEREUM
-      ? process.env[keyFactory("API_KEY_", "etherscan", "upper")]
-      : process.env[keyFactory("API_KEY_", network, "upper", "SCAN")];
+  // Etherscan API V2: a single key is used for all chains (chainid specified in the parameters)
+  const apiKey = process.env[keyFactory("API_KEY_", "etherscan", "upper")];
 
   if (!apiKey || !apiKey.length) {
     throw new Error(i18n.t("common.errors.errorApiKeyNotFound", { network, apiKey }));
   }
 
+  const chainid = etherscanChainIds[network];
+
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       const response = await axios.get(apiUrl, {
         params: {
+          chainid,
           module: "block",
           action: "getblocknobytime",
           timestamp: timestamp,
@@ -342,4 +345,51 @@ export function extractBaseName(result: string): string {
 export function logInFile(filePath: string, data: string, append: boolean = false) {
   const mode = append ? "a" : "w";
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), { mode });
+}
+
+/**
+ *  Fonction de log dans le terminal
+ */
+export function logInTerminal(type: "info" | "debug" | "error", data: any[]) {
+  const Reset = "\x1b[0m";
+  const Red = "\x1b[31m";
+  const Green = "\x1b[32m";
+  const Yellow = "\x1b[33m";
+  const Blue = "\x1b[34m";
+  const Purple = "\x1b[35m";
+  const Cyan = "\x1b[36m";
+  const Gray = "\x1b[37m";
+  const White = "\x1b[97m";
+
+  // Formatage des Datas en string avec mise en forme des valeurs en fonction du type
+  const formattedData = data
+    .map((item) => {
+      if (typeof item === "object") {
+        return `${Cyan}${JSON.stringify(item)}${Reset}`;
+      }
+
+      if (typeof item === "number") {
+        return `${Yellow}${item.toString()}${Reset}`;
+      }
+
+      if (typeof item === "boolean") {
+        return `${Blue}${item.toString()}${Reset}`;
+      }
+      return item;
+    })
+    .join(" ");
+
+  switch (type) {
+    case "info":
+      console.info(`${Green}[INFO]${Reset}`, formattedData);
+      break;
+    case "debug":
+      if (MODE_DEBUG) {
+        console.debug(`${Purple}[DEBUG]${Reset}`, formattedData);
+      }
+      break;
+    case "error":
+      console.error(`${Red}[ERROR]${Reset}`, formattedData);
+      break;
+  }
 }

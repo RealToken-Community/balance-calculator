@@ -16,7 +16,7 @@ if (!process.env.THEGRAPH_API_KEY) {
 
 export const PRINT_QUERY = false;
 export const MAJ_MOCK_DATA = false;
-export const MODE_DEBUG = false;
+export const MODE_DEBUG = true;
 
 export enum TOKEN_ADDRESS {
   REG = "0x0aa1e96d2a46ec6beb2923de1e61addf5f5f1dce",
@@ -65,11 +65,18 @@ export const networkToDexsMap: { [key in Network]: string[] } = {
   [NETWORK.POLYGON]: [],
 };
 
+/** Etherscan API V2 : une seule base URL et une seule clé pour toutes les chaînes (V1 dépréciée mi-2025). */
 export const etherscanApiUrls: NetworkApiUrls = {
-  [NETWORK.GNOSIS]: "https://api.gnosisscan.io/api",
-  [NETWORK.ETHEREUM]: "https://api.etherscan.io/api",
-  [NETWORK.POLYGON]: "https://api.polygonscan.com/api",
-  // Ajoutez d'autres URL d'API ici...
+  [NETWORK.GNOSIS]: "https://api.etherscan.io/v2/api",
+  [NETWORK.ETHEREUM]: "https://api.etherscan.io/v2/api",
+  [NETWORK.POLYGON]: "https://api.etherscan.io/v2/api",
+};
+
+/** chainid requis par l'API Etherscan V2 pour chaque réseau. */
+export const etherscanChainIds: { [key in Network]: number } = {
+  [NETWORK.GNOSIS]: 100,
+  [NETWORK.ETHEREUM]: 1,
+  [NETWORK.POLYGON]: 137,
 };
 
 export const moralisApiUrls: NetworkApiUrls = {
