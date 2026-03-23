@@ -1,6 +1,7 @@
 import { DexFunctionMapping, NetworkApiUrls, NetworkStartBlocks } from "../types/dexConfig.types.js";
 import {
   getRegBalancesBalancer,
+  getRegBalancesBalancerCowAmm,
   getRegBalancesHoneySwap,
   getRegBalancesSushiSwap,
   getRegBalancesSwaprHQ,
@@ -27,6 +28,7 @@ export enum TOKEN_ADDRESS {
 export enum DEX {
   SUSHISWAP = "sushiswap",
   BALANCER = "balancer",
+  BALANCER_COW_AMM = "balancer_cow_amm",
   HONEYSWAP = "honeyswap",
   SWAPRHQ = "swaprhq",
 }
@@ -60,7 +62,7 @@ export type DexValue = `${DEX}`;
  * Mapping of network to corresponding decentralized exchanges (DEXs).
  */
 export const networkToDexsMap: { [key in Network]: string[] } = {
-  [NETWORK.GNOSIS]: ["honeyswap", "sushiswap", "balancer", "swaprhq"],
+  [NETWORK.GNOSIS]: ["honeyswap", "sushiswap", "balancer", "balancer_cow_amm", "swaprhq"],
   [NETWORK.ETHEREUM]: [],
   [NETWORK.POLYGON]: [],
 };
@@ -115,6 +117,7 @@ export const blockStartREG: NetworkStartBlocks = {
 export const dexFunctionMap: DexFunctionMapping = {
   [DEX.HONEYSWAP]: getRegBalancesHoneySwap,
   [DEX.BALANCER]: getRegBalancesBalancer,
+  [DEX.BALANCER_COW_AMM]: getRegBalancesBalancerCowAmm,
   [DEX.SUSHISWAP]: getRegBalancesSushiSwap,
   [DEX.SWAPRHQ]: getRegBalancesSwaprHQ,
   // Ajoutez d'autres DEX ici...

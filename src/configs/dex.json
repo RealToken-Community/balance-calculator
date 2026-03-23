@@ -33,11 +33,16 @@
           "0x333c19b134553fdc75b2e252b7f56dd3ec34c1f9",
           "0x915938ff0a2b54e575068ff1a95007cafba7d277",
           "0x95a2e3f73cdcef576a7d9b9e0d11efb5df90f166",
-          "0xf11ad03bbe64a493482c9a263995a6bec4343d6b",
-          "0xc26b40c960bf8a9f8e9cd62543379c400fd68788"
+          "0xf11ad03bbe64a493482c9a263995a6bec4343d6b"
         ],
         "graphUrl": "https:gateway.thegraph.com/api/[api-key]/subgraphs/id/EJezH1Cp31QkKPaBDerhVPRWsKVZLrDfzjrLqpmv6cGg",
         "mockData": "balancer.json",
+        "dexType": "v2"
+      },
+      "balancer_cow_amm": {
+        "pool_id": ["0xc26b40c960bf8a9f8e9cd62543379c400fd68788"],
+        "graphUrl": "https:gateway.thegraph.com/api/[api-key]/subgraphs/id/4U58PZMVdUF6Kk7gW5wh78kHyr9pZ2pdxAEQeEh1EY9f",
+        "mockData": "balancer_cow_amm.json",
         "dexType": "v2"
       },
       "swaprhq": {

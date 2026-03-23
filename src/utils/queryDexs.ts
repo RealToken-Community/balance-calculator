@@ -14,6 +14,8 @@ import {
 } from "./lib.js";
 
 const __dirname = new URL(".", import.meta.url).pathname;
+const BALANCER_COW_AMM_GNOSIS_GRAPH_URL =
+  "https://gateway.thegraph.com/api/[api-key]/subgraphs/id/4U58PZMVdUF6Kk7gW5wh78kHyr9pZ2pdxAEQeEh1EY9f";
 
 //TODO améliorer les types pour remplacer les any
 
@@ -280,6 +282,79 @@ export async function getRegBalancesBalancer(
   }
 
   return responseformaterBalancer(result, targetAddress);
+}
+
+/**
+ * Récupère les données de pools Balancer CoW AMM sur Gnosis.
+ */
+export async function getRegBalancesBalancerCowAmm(
+  dexConfigs: DexConfigs,
+  network: Network,
+  timestamp?: number | undefined,
+  mock?: boolean,
+  targetAddress: string = "all"
+): Promise<ResponseFunctionGetRegBalances[]> {
+  if (network !== "gnosis") {
+    console.warn("WARNING: getRegBalancesBalancerCowAmm is only supported on gnosis network.");
+    return [];
+  }
+
+  if (mock) {
+    console.info(i18n.t("utils.queryDexs.infoUseMockData", { dex: "Balancer CoW AMM" }));
+    let data: any;
+    if (dexConfigs?.mockData && existsSync(join(__dirname, "..", "mocks", `${dexConfigs?.mockData}`))) {
+      data = JSON.parse(readFileSync(join(__dirname, "..", "mocks", `${dexConfigs.mockData}`), "utf-8"));
+    } else {
+      console.warn(
+        `WARNING: getRegBalancesBalancerCowAmm -> dexConfigs.mockData "${dexConfigs?.mockData}", le fichier correspondant n'existe pas.`
+      );
+      data = [];
+    }
+    return responseformaterBalancer(data, targetAddress);
+  }
+
+  if (dexConfigs === undefined) {
+    console.info(`INFO: getRegBalancesBalancerCowAmm -> dexConfigs is undefined for "${network}"`);
+    return [];
+  }
+
+  console.info(i18n.t("utils.queryDexs.infoQueryStart", { dex: "Balancer CoW AMM" }));
+  const blockNumber = await getBlockNumber(timestamp, network);
+  const paramBlockNumber = { number: blockNumber };
+  const client = createGraphQLClient(dexConfigs.graphUrl || BALANCER_COW_AMM_GNOSIS_GRAPH_URL);
+  const query = loadGraphQLQuery("src/graphql/balancesBalancerCowAmm.graphql");
+  const requestBody = {
+    query: query.loc?.source.body ?? "",
+    variables: {
+      first: 1000,
+      paramBlockNumber,
+      pool_id: dexConfigs.pool_id,
+    },
+  };
+
+  const response = await makeRequestWithRetry(client, requestBody, 5, 3000);
+  const pools = response?.pools ?? [];
+  const poolShares = response?.poolShares ?? [];
+
+  // Harmonise la réponse CoW AMM au format Balancer attendu par responseformaterBalancer.
+  const normalizedPairs = pools.map((pool: any) => {
+    const shares = poolShares
+      .filter((share: any) => share.pool?.address?.toLowerCase() === pool.address?.toLowerCase())
+      .map((share: any) => ({
+        balance: share.balance,
+        userAddress: {
+          id: share.user.id,
+        },
+      }));
+
+    return {
+      ...pool,
+      shares,
+    };
+  });
+
+  console.info(i18n.t("utils.queryDexs.infoQueryEnd", { dex: "Balancer CoW AMM" }));
+  return responseformaterBalancer(normalizedPairs, targetAddress);
 }
 
 /**

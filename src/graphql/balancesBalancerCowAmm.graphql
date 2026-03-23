@@ -1,0 +1,27 @@
+query getBalancerCowAmmBalances($first: Int!, $paramBlockNumber: Block_height, $pool_id: [String!]!) {
+  pools(first: $first, block: $paramBlockNumber, where: { address_in: $pool_id }) {
+    address
+    symbol
+    totalShares
+    tokens {
+      address
+      decimals
+      symbol
+      balance
+      weight
+    }
+  }
+  poolShares(
+    first: 1000
+    block: $paramBlockNumber
+    where: { pool_in: $pool_id, balance_gt: 0, user_not: "0x0000000000000000000000000000000000000000" }
+  ) {
+    balance
+    user {
+      id
+    }
+    pool {
+      address
+    }
+  }
+}
