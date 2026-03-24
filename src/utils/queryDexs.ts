@@ -846,6 +846,9 @@ function responseformaterTypeUniV3(
               tokenBalance: position.adjusted_amount0.toString(10),
               tokenPosition: 0,
               equivalentREG:
+                position.adjusted_amount0 === 0
+                  ? "0"
+                  :
                 position.token0Id === TOKEN_ADDRESS.REG
                   ? position.adjusted_amount0.toString(10)
                   : calculateTokenEquivalentTypeUniV3(
@@ -862,6 +865,9 @@ function responseformaterTypeUniV3(
               tokenBalance: position.adjusted_amount1.toString(10),
               tokenPosition: 1,
               equivalentREG:
+                position.adjusted_amount1 === 0
+                  ? "0"
+                  :
                 position.token1Id === TOKEN_ADDRESS.REG
                   ? position.adjusted_amount1.toString(10)
                   : calculateTokenEquivalentTypeUniV3(
@@ -915,4 +921,102 @@ export async function getRegBalancesSwaprHQ(
   targetAddress: string = "all"
 ): Promise<ResponseFunctionGetRegBalances[]> {
   return await getRegBalancesTypeUniV3(dexConfigs, network, "SwaprHQ", timestamp, mock, targetAddress);
+}
+
+/**
+ * Appel fonction générique uniswap v3 pour Uniswap V3.
+ */
+export async function getRegBalancesUniswapV3(
+  dexConfigs: DexConfigs,
+  network: Network,
+  timestamp?: number | undefined,
+  mock?: boolean,
+  targetAddress: string = "all"
+): Promise<ResponseFunctionGetRegBalances[]> {
+  if (network !== "gnosis") {
+    console.warn(`WARNING: getRegBalancesUniswapV3 is not configured for network "${network}" yet.`);
+    return [];
+  }
+
+  if (mock) {
+    console.info(i18n.t("utils.queryDexs.infoUseMockData", { dex: "UniswapV3" }));
+    let data: ResponseSushiSwapV3GraphALL;
+    if (dexConfigs?.mockData && existsSync(join(__dirname, "..", "mocks", `${dexConfigs.mockData}`))) {
+      data = JSON.parse(readFileSync(join(__dirname, "..", "mocks", `${dexConfigs.mockData}`), "utf-8"));
+    } else {
+      console.warn(i18n.t("utils.queryDexs.warnFileNotFound", { dexName: "UniswapV3", filePath: dexConfigs.mockData }));
+      data = { data: { pools: [], positions: [] } };
+    }
+    return responseformaterTypeUniV3(data, dexConfigs, "UniswapV3", targetAddress);
+  }
+
+  if (dexConfigs === undefined) {
+    console.info(i18n.t("utils.queryDexs.infoGetRegBalances", { dexName: "UniswapV3", network }));
+    return [];
+  }
+
+  const client = createGraphQLClient(dexConfigs.graphUrl);
+  const blockNumber = await getBlockNumber(timestamp, network);
+  const paramBlockNumber = { number: blockNumber };
+  const first = 1000;
+  const queryDocument = loadGraphQLQuery("src/graphql/balancesUniswapV3.graphql") as DocumentNode;
+
+  const getQueryBody = (operationName: string): string => {
+    const operation = queryDocument.definitions.find(
+      (def): def is OperationDefinitionNode => def.kind === "OperationDefinition" && def.name?.value === operationName
+    );
+    if (!operation) {
+      throw new Error(i18n.t("utils.queryDexs.errorQueryNotFound", { operationName }));
+    }
+    return print(operation);
+  };
+
+  const poolsQuery = getQueryBody("getPoolsUniswapV3");
+  const positionsQuery =
+    targetAddress.toLowerCase() === "all"
+      ? getQueryBody("getPositionsUniswapV3All")
+      : getQueryBody("getPositionsUniswapV3WithAddress");
+
+  const poolsResponse = await makeRequestWithRetry(client, {
+    query: poolsQuery,
+    variables: { first, paramBlockNumber, pool_id: dexConfigs.pool_id },
+  });
+  const pools = poolsResponse?.pools ?? [];
+  if (pools.length === 0) return [];
+
+  let positionsId = "0x00";
+  const allPositions: any[] = [];
+  const targetAddressFilter = targetAddress.toLowerCase() === "all" ? undefined : [targetAddress.toLowerCase()];
+
+  while (true) {
+    const positionsResponse = await makeRequestWithRetry(client, {
+      query: positionsQuery,
+      variables: {
+        first,
+        paramBlockNumber,
+        positions_id: positionsId,
+        pool_id: dexConfigs.pool_id,
+        ...(targetAddressFilter && { targetAddress: targetAddressFilter }),
+      },
+    });
+
+    const positions = positionsResponse?.positions ?? [];
+    if (positions.length === 0) break;
+    allPositions.push(...positions);
+    positionsId = positions[positions.length - 1]?.id ?? positionsId;
+    if (targetAddressFilter || positions.length < first) break;
+  }
+
+  const normalizedPositions = allPositions.map((position: any) => ({
+    ...position,
+    tickLower: { tickIdx: String(position.lowerTick) },
+    tickUpper: { tickIdx: String(position.upperTick) },
+  }));
+
+  return responseformaterTypeUniV3(
+    { data: { pools, positions: normalizedPositions } },
+    dexConfigs,
+    "UniswapV3",
+    targetAddress
+  );
 }

@@ -26,6 +26,12 @@
         "mockData": "sushiswap_v3.json",
         "dexType": "v3"
       },
+      "uniswapv3": {
+        "pool_id": ["0xcfaab974274ef22fa4e50af473d6f2f740b035df"],
+        "graphUrl": "https:gateway.thegraph.com/api/[api-key]/subgraphs/id/273zBsseGBnPDGyyfgzosqQPdkzoXkstQuxaTSmAJZry",
+        "mockData": "uniswapv3.json",
+        "dexType": "v3"
+      },
       "balancer": {
         "pool_id": [
           "0x17794db163dd298bba1ffa4d42918c6b8474d948",
