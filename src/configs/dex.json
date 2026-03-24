@@ -39,6 +39,12 @@
         "mockData": "balancer.json",
         "dexType": "v2"
       },
+      "balancer_cow_amm": {
+        "pool_id": ["0xc26b40c960bf8a9f8e9cd62543379c400fd68788"],
+        "graphUrl": "https:gateway.thegraph.com/api/[api-key]/subgraphs/id/4U58PZMVdUF6Kk7gW5wh78kHyr9pZ2pdxAEQeEh1EY9f",
+        "mockData": "balancer_cow_amm.json",
+        "dexType": "v2"
+      },
       "swaprhq": {
         "pool_id": ["0x4332031095bb5da682c88e7e14fc033e212f8290"],
         "graphUrl": "https:gateway.thegraph.com/api/[api-key]/subgraphs/id/AAA1vYjxwFHzbt6qKwLHNcDSASyr1J1xVViDH8gTMFMR",
