@@ -4,6 +4,7 @@ import {
   getRegBalancesBalancerCowAmm,
   getRegBalancesHoneySwap,
   getRegBalancesSushiSwap,
+  getRegBalancesUniswapV3,
   getRegBalancesSwaprHQ,
 } from "../utils/queryDexs.js";
 
@@ -27,6 +28,7 @@ export enum TOKEN_ADDRESS {
 
 export enum DEX {
   SUSHISWAP = "sushiswap",
+  UNISWAPV3 = "uniswapv3",
   BALANCER = "balancer",
   BALANCER_COW_AMM = "balancer_cow_amm",
   HONEYSWAP = "honeyswap",
@@ -62,7 +64,7 @@ export type DexValue = `${DEX}`;
  * Mapping of network to corresponding decentralized exchanges (DEXs).
  */
 export const networkToDexsMap: { [key in Network]: string[] } = {
-  [NETWORK.GNOSIS]: ["honeyswap", "sushiswap", "balancer", "balancer_cow_amm", "swaprhq"],
+  [NETWORK.GNOSIS]: ["honeyswap", "sushiswap", "uniswapv3", "balancer", "balancer_cow_amm", "swaprhq"],
   [NETWORK.ETHEREUM]: [],
   [NETWORK.POLYGON]: [],
 };
@@ -119,6 +121,7 @@ export const dexFunctionMap: DexFunctionMapping = {
   [DEX.BALANCER]: getRegBalancesBalancer,
   [DEX.BALANCER_COW_AMM]: getRegBalancesBalancerCowAmm,
   [DEX.SUSHISWAP]: getRegBalancesSushiSwap,
+  [DEX.UNISWAPV3]: getRegBalancesUniswapV3,
   [DEX.SWAPRHQ]: getRegBalancesSwaprHQ,
   // Ajoutez d'autres DEX ici...
 };
